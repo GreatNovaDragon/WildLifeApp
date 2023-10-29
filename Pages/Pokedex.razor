@@ -1,0 +1,33 @@
+﻿@page "/pokedex"
+
+@using WildLifeApp.Data
+@inject PokemonService ForecastService
+
+<h1>Weather forecast</h1>
+
+<p>This component demonstrates fetching data from a service.</p>
+
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+    @foreach (var forecast in forecasts)
+    {
+        <PokemonCard pokemon="forecast"/>
+    }
+}
+   
+
+@code {
+    private Pokemon[] forecasts;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecasts = await ForecastService.GetPokemonList();
+    }
+}
