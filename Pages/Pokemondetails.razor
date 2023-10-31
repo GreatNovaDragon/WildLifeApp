@@ -1,8 +1,29 @@
 ﻿@page "/Pokemondetails/{dexid}"
+@using WildLifeApp.Data
+@inject PokemonService pokemonservice;
 
-<h3>@Dexid</h3>
-
+<h1>
+    @if (String.IsNullOrEmpty(pkmn.Name_DE))
+    {
+        @pkmn.Name
+    }
+   @pkmn.Name_DE
+    @if (!String.IsNullOrEmpty(pkmn.Form))
+    {
+        var str = $"({pkmn.Form})";   
+        @str        
+    }
+</h1>
 @code {
     [Parameter]
     public string? Dexid { get; set; }
+
+    private Pokemon pkmn;
+    private List<Learnset> learnset;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pkmn = await pokemonservice.GetPokemon(Dexid);
+        learnset = await pokemonservice.GetLearnset(pkmn);
+    }
 }

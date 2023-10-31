@@ -1,8 +1,31 @@
 ﻿@using WildLifeApp.Data
 
-<img src="@pokemon.ImageLink" />
-<h3>@pokemon.Name</h3>
+<div class="w3-container w3-cell w3-mobile" style="width: 20%;
+	margin: 1%;	">
+    <div class="w3-card">
+    <a href="/pokemondetails/@pokemon.ID">
+            <img src="@pokemon.ImageLink" style="max-width:100%;
+                 max-height:100%;" />
 
+            <div class="w3-container w3-light-blue">
+                <h2>
+                    @if (String.IsNullOrEmpty(pokemon.Name_DE))
+                    {
+                        @pokemon.Name
+                    }
+                    
+                    @pokemon.Name_DE
+                    @if (!String.IsNullOrEmpty(pokemon.Form))
+                    {
+                        var str = $" ({pokemon.Form})";
+                        @str
+                    }
+                </h2>
+            </div>
+        
+    </a>
+    </div>
+</div>
 @code {
 
 }

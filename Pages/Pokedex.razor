@@ -13,11 +13,12 @@
 }
 else
 {
-
+    <div style="display: flex; flex-wrap: wrap;">
     @foreach (var forecast in forecasts)
     {
         <PokemonCard pokemon="forecast"/>
-    }
+        }
+    </div>
 }
    
 
