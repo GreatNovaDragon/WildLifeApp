@@ -7,9 +7,6 @@ namespace WildLifeApp;
 
 public class Helpers
 {
-   
-
-
     public static mv[] csv2moves(string whereItIs)
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
@@ -30,26 +27,6 @@ public class Helpers
         using var reader = new StreamReader(whereItIs);
         using var csv = new CsvReader(reader, config);
         return csv.GetRecords<tr>().ToArray();
-    }
-
-    public class mv
-    {
-        [Index(0)] public string move { get; set; }
-        [Index(1)] public string how_often { get; set; }
-        [Index(2)] public string effect { get; set; }
-    }
-
-    public class ab
-    {
-        [Index(0)] public string ability { get; set; }
-        [Index(1)] public string effect { get; set; }
-    }
-
-    public class tr
-    {
-        [Index(0)] public string Name { get; set; }
-        [Index(1)] public string effect { get; set; }
-        [Index(2)] public string Requirement { get; set; }
     }
 
 
@@ -150,5 +127,25 @@ public class Helpers
             default:
                 return "";
         }
+    }
+
+    public class mv
+    {
+        [Index(0)] public string move { get; set; }
+        [Index(1)] public string how_often { get; set; }
+        [Index(2)] public string effect { get; set; }
+    }
+
+    public class ab
+    {
+        [Index(0)] public string ability { get; set; }
+        [Index(1)] public string effect { get; set; }
+    }
+
+    public class tr
+    {
+        [Index(0)] public string Name { get; set; }
+        [Index(1)] public string effect { get; set; }
+        [Index(2)] public string Requirement { get; set; }
     }
 }

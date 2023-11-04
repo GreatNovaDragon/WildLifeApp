@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Maui.Storage;
+using SQLitePCL;
 
 namespace WildLifeApp.Data;
 
@@ -8,10 +8,9 @@ public class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext()
     {
+        Batteries_V2.Init();
 
-        SQLitePCL.Batteries_V2.Init();
-
-        this.Database.EnsureCreated();
+        Database.EnsureCreated();
     }
 
     public DbSet<Ability> AbilityDex { get; set; }
@@ -26,17 +25,17 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        string dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
 
         if (!File.Exists(dbPath))
         {
-            using Stream inputStream = FileSystem.Current.OpenAppPackageFileAsync("app.db").Result;
+            using var inputStream = FileSystem.Current.OpenAppPackageFileAsync("app.db").Result;
 
             // Create an output filename
-        
+
 
             // Copy the file to the AppDataDirectory
-            using FileStream outputStream = File.Create(dbPath);
+            using var outputStream = File.Create(dbPath);
             inputStream.CopyTo(outputStream);
         }
 
@@ -122,7 +121,6 @@ public class Pokemon
     public int SP_DEF { get; set; }
     public int SPEED { get; set; }
 }
-
 
 public class Learnset
 {

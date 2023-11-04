@@ -1,29 +1,311 @@
 ﻿@page "/Pokemondetails/{dexid}"
 @using WildLifeApp.Data
+@using Markdig
+
 @inject PokemonService pokemonservice;
 
 <h1>
-    @if (String.IsNullOrEmpty(pkmn.Name_DE))
+    @if (string.IsNullOrEmpty(pkmn.Name_DE))
     {
         @pkmn.Name
     }
-   @pkmn.Name_DE
-    @if (!String.IsNullOrEmpty(pkmn.Form))
+    @pkmn.Name_DE
+    @if (!string.IsNullOrEmpty(pkmn.Form))
     {
-        var str = $"({pkmn.Form})";   
-        @str        
+        var str = $"({pkmn.Form})";
+        @str
     }
 </h1>
+
+<div class="w3-cell-row">
+    <div class="w3-container w3-third w3-cell w3-mobile">
+        <img src="@pkmn.ImageLink" class="w3-image"/>
+    </div>
+    <div class="w3-container w3-third w3-cell w3-mobile">
+        <h3>Typen</h3>
+        @pkmn.Type1.Name_DE
+        @if (pkmn.Type2 != null)
+        {
+            @pkmn.Type2!.Name_DE
+        }
+
+        <h2>Fähigkeiten</h2>
+
+        @foreach (var a in pkmn.Abilities)
+        {
+            <h3>@a.Name_DE</h3>
+
+
+            @((MarkupString)Markdown.ToHtml(a.Effect))
+        }
+    </div>
+
+    <div class="w3-container w3-third w3-cell w3-mobile">
+        <Chart Config="_config1" @ref="_chart1"></Chart>
+
+
+        <script>
+           const ctx = document.getElementById('myChart');
+         
+           new Chart(ctx, {
+             type: 'radar',
+             data: {
+               labels: ['Gesundheit ' + pkmn.HEALTH + "/50", 'ATK pkmn.ATK)/25', 'DEF pkmn.DEF)/25', 'SpATK pkmn.SP_ATK)/25' , 'SpDEF pkmn.SP_DEF)/25', 'Initiative pkmn.SPEED)/25'],
+               datasets: [{
+                 label: '',
+                 data: [pkmn.HEALTH/2, pkmn.ATK, pkmn.DEF, pkmn.SP_ATK, pkmn.SP_DEF, pkmn.SPEED],
+                 borderWidth: 1
+               }]
+             },
+             options: {
+               scales: {
+                 r: {
+                   min: 0,
+                   max: 25,
+                   pointLabels: {
+                       font: {size: 15}
+                   }
+                 }
+               }
+             }
+           });
+         </script>
+    </div>
+
+
+</div>
+
+
+<h2>Learnable Moves</h2>
+
+
+<div class="w3-row">
+    <a href="javascript:void(0)" onclick="openCity(event, 'LevelUp');">
+        <div class="w3-third tablink w3-bottombar w3-hover-light-grey w3-padding  w3-border-red">Level Up</div>
+    </a>
+    <a href="javascript:void(0)" onclick="openCity(event, 'TM');">
+        <div class="w3-third tablink w3-bottombar w3-hover-light-grey w3-padding">TM</div>
+    </a>
+    <a href="javascript:void(0)" onclick="openCity(event, 'TutorEgg');">
+        <div class="w3-third tablink w3-bottombar w3-hover-light-grey w3-padding">Sonstige</div>
+    </a>
+</div>
+
+
+<div id="LevelUp" class="w3-container city" style=" display: flex; flex-wrap: wrap ;  justify-content: space-evenly">
+    @foreach (var move in learnset.Where(e => e.level != 0).OrderBy(e => e.level))
+    {
+        <div class="w3-container w3-cell w3-mobile" style="flex:  1 1 33.333333%;">
+            <div class="w3-card">
+                <header class="w3-container w3-blue">
+                    <h3>
+                        <a asp-page="/moves/Details" asp-route-id="@move.move.ID">
+                            @move.move.Name_DE
+                            @if (string.IsNullOrEmpty(move.move.Name_DE))
+                            {
+                                @move.move.Name
+                            }
+                        </a>
+                    </h3>
+                </header>
+
+                <div class="w3-container">
+                    <dl>
+                        <dt>
+                            Gelernt via
+                        </dt>
+                        <dd>@move.how</dd>
+                        <dt>Gelernt auf Level</dt>
+                        <dd>@move.level</dd>
+                        <dt>Angrifssklasse</dt>
+                        <dd>
+                            @move.move.MoveClass.Name_DE
+                        </dd>
+                        <dt>Move Typ</dt>
+                        <dd>@move.move.type.Name_DE</dd>
+                        <dt>Quellen-Game</dt>
+                        <dd>@move.source</dd>
+
+
+                        @if (!string.IsNullOrEmpty(move.move.DamageDice))
+                        {
+                            <dt>Schadenswürfel Dice</dt>
+                            <dd>@move.move.DamageDice</dd>
+                        }
+                        else
+                        {
+                            <dt>&nbsp;</dt>
+                            <dd>&nbsp;</dd>
+                        }
+                    </dl>
+                </div>
+
+
+                <div class="w3-container w3-light-blue">
+                    <h4>Effekt</h4>
+                </div>
+                <div class="w3-container">
+                    @((MarkupString)Markdown.ToHtml(move.move.Effect))
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<div id="TM" class="w3-container city" style="display:none; flex-wrap: wrap ; flex:  1 1 0px; justify-content: space-around">
+    @foreach (var move in learnset.Where(e => e.how == "machine"))
+    {
+        <div class="w3-container w3-cell w3-mobile" style="flex:  1 1 33.333333%;">
+            <div class="w3-card">
+                <header class="w3-container w3-blue">
+                    <h3>
+                        <a asp-page="/moves/Details" asp-route-id="@move.move.ID">
+                            @move.move.Name_DE
+                            @if (string.IsNullOrEmpty(move.move.Name_DE))
+                            {
+                                @move.move.Name
+                            }
+                        </a>
+                    </h3>
+                </header>
+
+                <div class="w3-container">
+                    <dl>
+                        <dt>
+                            Gelernt via
+                        </dt>
+                        <dd>@move.how</dd>
+                        <dt>Gelernt auf Level</dt>
+                        <dd>@move.level</dd>
+                        <dt>Angrifssklasse</dt>
+                        <dd>
+                            @move.move.MoveClass.Name_DE
+                        </dd>
+                        <dt>Move Typ</dt>
+                        <dd>@move.move.type.Name_DE</dd>
+                        <dt>Quellen-Game</dt>
+                        <dd>@move.source</dd>
+
+
+                        @if (string.IsNullOrEmpty(move.move.DamageDice))
+                        {
+                            <dt>Schadenswürfel Dice</dt>
+                            <dd>@move.move.DamageDice</dd>
+                        }
+                        else
+                        {
+                            <dt>&nbsp;</dt>
+                            <dd>&nbsp;</dd>
+                        }
+                    </dl>
+                </div>
+
+
+                <div class="w3-container w3-light-blue">
+                    <h4>Effekt</h4>
+                </div>
+                <div class="w3-container">
+                    @((MarkupString)Markdown.ToHtml(move.move.Effect))
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div id="TutorEgg" class="w3-container city" style="display:none; flex-wrap: wrap ; flex:  1 1 0px; justify-content: space-around">
+
+    @foreach (var move in learnset.Where(e => !new List<string> { "machine", "level-up" }.Contains(e.how)).OrderBy(m => m.how))
+    {
+        <div class="w3-container w3-cell w3-mobile" style="flex:  1 1 33.333333%;">
+            <div class="w3-card">
+                <header class="w3-container w3-blue">
+                    <h3>
+                        <a asp-page="/moves/Details" asp-route-id="@move.move.ID">
+                            @move.move.Name_DE
+                            @if (string.IsNullOrEmpty(move.move.Name_DE))
+                            {
+                                @move.move.Name
+                            }
+                        </a>
+                    </h3>
+                </header>
+
+                <div class="w3-container">
+                    <dl>
+                        <dt>
+                            Gelernt via
+                        </dt>
+                        <dd>@move.how</dd>
+                        <dt>Gelernt auf Level</dt>
+                        <dd>@move.level</dd>
+                        <dt>Angrifssklasse</dt>
+                        <dd>
+                            @move.move.MoveClass.Name_DE
+                        </dd>
+                        <dt>Move Typ</dt>
+                        <dd>@move.move.type.Name_DE)</dd>
+                        <dt>Quellen-Game</dt>
+                        <dd>@move.source</dd>
+
+
+                        @if (!string.IsNullOrEmpty(move.move.DamageDice))
+                        {
+                            <dt>Schadenswürfel Dice</dt>
+                            <dd>@move.move.DamageDice</dd>
+                        }
+                        else
+                        {
+                            <dt>&nbsp;</dt>
+                            <dd>&nbsp;</dd>
+                        }
+                    </dl>
+                </div>
+
+
+                <div class="w3-container w3-light-blue">
+                    <h4>Effekt</h4>
+                </div>
+                <div class="w3-container">
+                    @((MarkupString)Markdown.ToHtml(move.move.Effect))
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+function openCity(evt, cityName) {
+  var i, x, tablinks;
+  x = document.getElementsByClassName("city");
+  for (i = 0; i < x.length; i++) {
+    x[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablink");
+  for (i = 0; i < x.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" w3-border-red", "");
+  }
+  document.getElementById(cityName).style.display = "flex";
+  evt.currentTarget.firstElementChild.className += " w3-border-red";
+}
+</script>
+
+
 @code {
+
     [Parameter]
     public string? Dexid { get; set; }
 
     private Pokemon pkmn;
     private List<Learnset> learnset;
 
+    private BarChartConfig? _config1;
+    private Chart? _chart1;
+
+
     protected override async Task OnInitializedAsync()
     {
         pkmn = await pokemonservice.GetPokemon(Dexid);
         learnset = await pokemonservice.GetLearnset(pkmn);
     }
+
 }
