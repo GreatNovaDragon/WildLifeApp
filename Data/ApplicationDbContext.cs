@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using SQLitePCL;
 
@@ -27,13 +28,41 @@ public class ApplicationDbContext : DbContext
     {
         var dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
 
-        if (!File.Exists(dbPath))
+        using var inputStream = FileSystem.Current.OpenAppPackageFileAsync("app.db").Result;
+
+
+        bool create = true;
+        bool exists = File.Exists(dbPath);
+
+        if (exists)
         {
-            using var inputStream = FileSystem.Current.OpenAppPackageFileAsync("app.db").Result;
+            var file = new FileStream(dbPath, FileMode.Open);
+            var virt = FileSystem.Current.OpenAppPackageFileAsync("app.db").Result;
+
+            using (var md5 = MD5.Create())
+            {
+                
+                byte[] firstHash = MD5.Create().ComputeHash(file);
+                byte[] secondHash = MD5.Create().ComputeHash(virt);
+
+                for (int i=0; i<firstHash.Length; i++)
+                {
+                    if (firstHash[i] != secondHash[i])
+                        create= false;
+                }
+            }
+            
+            file.Close();
+        }
+
+        if (create)
+        {
+            if (exists)
+            {
+                File.Delete(dbPath);
+            }
 
             // Create an output filename
-
-
             // Copy the file to the AppDataDirectory
             using var outputStream = File.Create(dbPath);
             inputStream.CopyTo(outputStream);
